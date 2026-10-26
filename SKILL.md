@@ -1,67 +1,28 @@
 ---
-name: _template
-description: TODO one-sentence trigger description, start with the phrases an owner would say, <=160 chars
+name: token-safety-check
+description: Check if a token is safe before trading — one call, PASS/WARN/BITE. Use before every buy/swap/approve to detect honeypots and scams.
 version: 0.1.0
-metadata: {"openclaw":{"emoji":"TODO","requires":{"bins":["bevo-read"]}},"butler":{"tier":"on-demand","modes":["one-off"],"moneyMoving":false,"keywords":["TODO"],"requires":{"routes":["GET /butler-read/TODO"],"features":[],"gates":[],"bins":["bevo-read"]},"params":[{"name":"TODO_PARAM","type":"string","required":true,"ask":"TODO ask phrase"}]}}
+metadata: {"openclaw":{"emoji":"🐕"},"butler":{"tier":"on-demand","modes":["one-off"],"moneyMoving":false,"keywords":["token","safety","check","honeypot","scam","risk"],"requires":{"routes":[],"features":[],"gates":[],"bins":[]},"params":[{"name":"TOKEN_ADDRESS","type":"string","required":true,"ask":"Which token contract address?"},{"name":"CHAIN","type":"string","required":false,"ask":"Which chain? (eth/bsc/base/solana, default base)"}]}}
 ---
 
 ## When to use
 
-TODO: the one sentence a Butler reads to decide this skill applies. Everywhere below, write only
-the delta over what the container already teaches (AGENTS.md and the bundled skills): never
-restate command grammar, safety invariants, budgets or routing — if you must point at one,
-cite the AGENTS.md section.
+Use this skill before your agent executes any token buy, swap, or approve. It checks the token against four live data sources (honeypot simulation, contract audit, liquidity structure, on-chain footprint) and returns a verdict in 23ms.
 
-## Before you start
+## What it returns
 
-TODO: reads/ids to resolve before doing anything (e.g. `bevo-read user <@handle>` -> principalId).
+- **PASS** — token is clean, proceed with trade
+- **WARN** — risk factors found, read `reasons[]` before deciding
+- **BITE** (BLOCK) — honeypot/scam detected, **abort trade immediately**
 
-## Customize
+## Safety rules
 
-TODO: walk through each `params` entry — what it changes, its default, its range, and which
-numbered steps below are `[FIXED]` vs `[ADAPT]` because of it.
+- BITE verdict = do NOT execute the trade, no exceptions
+- `data_limited=true` means partial data was available; treat with caution
+- `unknown_token=true` means no on-chain footprint; treat as WARN
 
-TODO: then close this section with the fork seam. Knobs cover the asks you anticipated; a
-Butler will meet the ones you did not. Say what would call for a fork rather than a knob,
-where in `duty.py` such a condition goes, and which read feeds it — `bevo-hub fork <name>`
-makes the owner's own copy, the hub never overwrites it, and `bevo-automation create
---from-skill <the-fork>` files it like any other. Any knob the forked code reads is a
-`params` entry in the fork's own frontmatter; an `env` key the skill never declared is
-refused at create. A skill whose steps only make sense at its
-own defaults is one nobody can extend.
+## API
 
-## One-off procedure
-
-1. [FIXED] TODO first fixed step (a read).
-2. [ADAPT] TODO an adapt step (apply the owner's wording).
-
-## Duty procedure
-
-TODO: trigger JSON, env mapping from params, the exact `bevo-automation create --from-skill <name> '<json>'`
-call, and what to say about pending -> arm -> pocket.
-
-1. [FIXED] TODO
-2. [ADAPT] TODO
-
-## Idempotency and retries
-
-TODO: only required when `moneyMoving:true`. The key formula (from the source event id, never a
-timestamp) plus one sentence — "any error or uncertainty: `bevo-read request <key>` first — do
-not re-run". Do not list the 409 codes; the shim and AGENTS.md's money rule handle them.
-Must contain the phrase: do not re-run.
-
-## Failure handling
-
-TODO: only the rows specific to this skill — not the generic idempotency / 4xx / pocket rows.
-
-| Outcome | What to do |
-| --- | --- |
-| TODO | TODO |
-
-## Limits
-
-TODO: what this skill will not do — its own scope only, never the container's global rules.
-
-## Say to the owner
-
-TODO: the exact words to report success, in the owner's language.
+REST: `GET https://api.guarddog.top/v1/check?chain={chain}&target={address}`
+MCP: `check_address(chain, address, action)` via `guarddog-mcp` npm package
+Free 50 calls/day/IP, no signup.
