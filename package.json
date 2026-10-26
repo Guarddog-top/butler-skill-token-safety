@@ -1,0 +1,16 @@
+{
+  "name": "guarddog-butler-token-safety",
+  "version": "0.1.0",
+  "description": "Butler skill: pre-trade token safety check via GuardDog. BITE auto-aborts. 23ms, 4 data sources, ETH/BSC/Base/Solana.",
+  "main": "duty.py",
+  "license": "MIT",
+  "keywords": [
+    "butler",
+    "virtuals",
+    "token",
+    "safety",
+    "guarddog",
+    "honeypot",
+    "pre-trade"
+  ]
+}
